@@ -1,6 +1,4 @@
 import {PointerLockControls} from "./js/PointerLockControls.js";
-import * as THREE from "./js/three.module.js";
-
 
 //declare variables
 var scene, camera, renderer, controls;
@@ -81,14 +79,9 @@ function initCannon(){
 	world=new CANNON.World();
 	world.gravity.set(0,-20,0);
 
-	const groundShape=new CANNON.Plane();
-	const material=new CANNON.Material();
-	var groundBody=new CANNON.Body({mass:0, material:material});
-	groundBody.quaternion.setFromAxisAngle( new CANNON.Vec3(1,0,0), -Math.PI/2)
-	groundBody.addShape(groundShape);
-	world.add(groundBody);
-
+	//for the player
 	const sphereShape=new CANNON.Sphere(2);
+	const material=new CANNON.Material();
 	sphereBody=new CANNON.Body({mass: 3, material:material});
 	sphereBody.position.x=camera.position.x;
 	sphereBody.position.y=camera.position.y;
@@ -100,13 +93,34 @@ function initCannon(){
 }
 init()
 initCannon()
-//add a plane to the scene
-const PlaneGeometry = new THREE.PlaneGeometry( 2000, 2000, 100, 100 );
+//ground
+const PlaneGeometry = new THREE.PlaneGeometry( 2000, 2000 );
 PlaneGeometry.rotateX( - Math.PI / 2 );
 const PlaneMaterial = new THREE.MeshStandardMaterial( { color: 0x304050});
 const floor=new THREE.Mesh(PlaneGeometry,PlaneMaterial);
 floor.receiveShadow=true;
 scene.add(floor)
+
+const groundShape=new CANNON.Plane();
+const material=new CANNON.Material();
+var groundBody=new CANNON.Body({mass:0, material:material});
+groundBody.quaternion.setFromAxisAngle( new CANNON.Vec3(1,0,0), -Math.PI/2)
+groundBody.addShape(groundShape);
+world.add(groundBody);
+
+//cube op
+const cubeGeo=new THREE.BoxGeometry( 5, 5, 5 );
+const cubeMat=new THREE.MeshNormalMaterial( {color: 0xffff00} );
+const box=new THREE.Mesh( cubeGeo, cubeMat)
+box.position.set(0,10,0)
+scene.add(box)
+
+const cubeShape=new CANNON.Box(new CANNON.Vec3(2.5,2.5,2.5))
+const cubeBody=new CANNON.Body({mass:1, material:material});
+cubeBody.addShape(cubeShape);
+cubeBody.position.set(0,10,0)
+world.add(cubeBody)
+/*
 //added a weird shape to the scene
 const icosahedronGeometry = new THREE.IcosahedronGeometry(5, 0)
 const icosahedronMaterial = new THREE.MeshNormalMaterial( {color: 0xffff00} );
@@ -133,7 +147,7 @@ icosahedronBody.addShape(icosahedronShape)
 icosahedronBody.position.x = icosahedron.position.x
 icosahedronBody.position.y = icosahedron.position.y
 icosahedronBody.position.z = icosahedron.position.z
-world.add(icosahedronBody)
+world.add(icosahedronBody)*/
 //clock
 let clock=new THREE.Clock()
 
@@ -196,9 +210,9 @@ function movePlayer(){
 	camera.position.z=sphereBody.position.z;
 	
 
-	icosahedron.position.x = icosahedronBody.position.x
-	icosahedron.position.y = icosahedronBody.position.y
-	icosahedron.position.z = icosahedronBody.position.z
+	//icosahedron.position.x = icosahedronBody.position.x
+	//icosahedron.position.y = icosahedronBody.position.y
+	//icosahedron.position.z = icosahedronBody.position.z
 
 	if(projectiles){
 		projectiles.forEach( (projectile) =>{
@@ -208,15 +222,24 @@ function movePlayer(){
 		})
 	}
 
+	box.position.x=cubeBody.position.x
+	box.position.y=cubeBody.position.y
+	box.position.z=cubeBody.position.z
+
+	box.quaternion.set(
+		cubeBody.quaternion.x,
+		cubeBody.quaternion.y,
+		cubeBody.quaternion.z,
+		cubeBody.quaternion.w,
+	)
 
 
-
-	icosahedron.quaternion.set(
-        icosahedronBody.quaternion.x,
-        icosahedronBody.quaternion.y,
-        icosahedronBody.quaternion.z,
-        icosahedronBody.quaternion.w
-    )
+	//icosahedron.quaternion.set(
+      //  icosahedronBody.quaternion.x,
+        //icosahedronBody.quaternion.y,
+        //icosahedronBody.quaternion.z,
+        //icosahedronBody.quaternion.w
+    //)
 
 }
 
